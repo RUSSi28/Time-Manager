@@ -14,4 +14,7 @@ interface DrawerItemDao {
 
     @Delete
     fun delete(task: NavigationDrawerItem)
+
+    @Update
+    fun updateNote(task: NavigationDrawerItem)
 }
