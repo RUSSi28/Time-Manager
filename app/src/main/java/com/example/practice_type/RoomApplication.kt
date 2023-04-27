@@ -8,6 +8,8 @@ class RoomApplication : Application() {
         lateinit var database: AppDatabase
     }
 
+
+    //ここでデータベースができてるはずテーブル名tasks
     override fun onCreate() {
         super.onCreate()
 

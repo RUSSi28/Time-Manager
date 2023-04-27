@@ -1,11 +1,13 @@
 package com.example.practice_type
 
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.TextStyle
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.*
 
+//このテーブルの値を更新するにはどうしたらいいんだろう
 @Entity(tableName = "tasks")
 data class NavigationDrawerItem(
     @PrimaryKey(autoGenerate = true)

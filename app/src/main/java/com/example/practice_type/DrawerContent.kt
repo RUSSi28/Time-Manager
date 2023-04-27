@@ -8,9 +8,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,40 +22,42 @@ import com.example.practice_type.ui.theme.PrimaryColor
 import com.example.practice_type.ui.theme.SubColor
 import com.example.practice_type.ui.theme.SubSubColor
 
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-
 //ページ2
+//状態ホイスティング
 @Composable
 fun DrawerContent(
 //    gradientColors: List<Color> = listOf(PrimaryColor, SubColor),
-    itemClick: (String) -> Unit
+    text: MutableState<String>,
+    itemClick: (String) -> Unit,
+    onClickButton: () -> Unit = {}
 ) {
 
-    var text: String by remember { mutableStateOf("") }
-    val itemsList = prepareNavigationDrawerItems()
+//    var text: String by remember { mutableStateOf("") }
+//    val itemsList = prepareNavigationDrawerItems()
+    val itemsList =
+        remember { mutableStateOf(prepareNavigationDrawerItems()) }
 
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = SubColor),
+    Column() {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = SubColor),
 //            .background(brush = Brush.verticalGradient(colors = gradientColors)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        contentPadding = PaddingValues(vertical = 36.dp)
-    ) {
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(vertical = 36.dp)
+        ) {
 
-        item {
-            Text(
-                modifier = Modifier
-                    .padding(bottom = 12.dp),
-                text = "TimeManager",
-                fontSize = 26.sp,
-                style = MaterialTheme.typography.h1,
-                color = Color.Black
-            )
+            item {
+                Text(
+                    modifier = Modifier
+                        .padding(bottom = 12.dp),
+                    text = "TimeManager",
+                    fontSize = 26.sp,
+                    style = MaterialTheme.typography.h1,
+                    color = Color.Black
+                )
 
-            // user's image
+                // user's image
 //            Image(
 //                modifier = Modifier
 //                    .size(size = 120.dp),
@@ -65,39 +65,51 @@ fun DrawerContent(
 //                contentDescription = "Profile Image"
 //            )
 
-            // user's email
-            Text(
-                modifier = Modifier.padding(top = 8.dp, bottom = 30.dp),
-                text = "you can easily manage your time",
-                style = MaterialTheme.typography.h3,
-                fontSize = 16.sp,
-                color = Color.Black
-            )
-        }
-
-        //高級関数、それぞれの配列に対して同様の処理を行う
-        items(itemsList) { item ->
-            NavigationListItem(item = item) {
-                itemClick(item.projectName)
-            }
-        }
-    }
-    //問題の箇所
-    Row() {
-        OutlinedTextField(
-            value = text,
-            onValueChange = {it -> text =it},
-            label = { Text(text = "projectName")},
-            modifier = Modifier.align(Alignment.CenterVertically)
-        )
-        Button(
-            onClick = {
-                if (text.isEmpty()) return@Button
-
+                // user's email
+                Text(
+                    modifier = Modifier.padding(top = 8.dp, bottom = 30.dp),
+                    text = "you can easily manage your time",
+                    style = MaterialTheme.typography.h3,
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
             }
 
+            //高級関数、それぞれの配列に対して同様の処理を行う
+            items(itemsList.value) { item ->
+                NavigationListItem(item = item) {
+                    itemClick(item.projectName)
+                }
+            }
+        }
+
+        //問題の箇所
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp)
         ) {
+            OutlinedTextField(
+                value = text.value,
+                onValueChange = { it -> text.value = it },
+                label = { Text(text = "projectName") },
+                modifier = Modifier.width(230.dp)
+            )
 
+            //ボタン押されたらデータベース追加したい、今はただのTextFieldにしかなってない
+            Button(
+                onClick = {
+                    onClickButton()//onClickButtonで処理を渡している⇨渡せていないかもしれない
+                    if (text.value.isEmpty()) return@Button
+                    text.value = ""
+                },
+
+
+                ) {
+                Text(text = "Add")
+            }
         }
     }
+
 }
+
