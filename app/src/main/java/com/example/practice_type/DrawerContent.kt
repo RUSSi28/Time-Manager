@@ -9,6 +9,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +28,8 @@ import com.example.practice_type.ui.theme.SubSubColor
 @Composable
 fun DrawerContent(
 //    gradientColors: List<Color> = listOf(PrimaryColor, SubColor),
+    projectList: SnapshotStateList<NavigationDrawerItem>,
+
     text: MutableState<String>,
     itemClick: (String) -> Unit,
     onClickButton: () -> Unit = {}
@@ -34,8 +37,7 @@ fun DrawerContent(
 
 //    var text: String by remember { mutableStateOf("") }
 //    val itemsList = prepareNavigationDrawerItems()
-    val itemsList =
-        remember { mutableStateOf(prepareNavigationDrawerItems()) }
+//    val itemsList = remember { mutableStateOf(prepareNavigationDrawerItems()) }
 
     Column() {
         LazyColumn(
@@ -75,10 +77,11 @@ fun DrawerContent(
                 )
             }
 
-            //高級関数、それぞれの配列に対して同様の処理を行う
-            items(itemsList.value) { item ->
+            items(projectList) { item ->
                 NavigationListItem(item = item) {
-                    itemClick(item.projectName)
+                    itemClick(
+                        item.projectName
+                    )
                 }
             }
         }

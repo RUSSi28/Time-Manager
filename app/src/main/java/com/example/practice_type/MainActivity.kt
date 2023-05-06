@@ -1,5 +1,6 @@
 package com.example.practice_type
 
+import android.icu.text.SimpleDateFormat
 import android.media.MediaParser.TrackData
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -10,6 +11,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,6 +59,7 @@ class MainActivity : ComponentActivity() {
     private fun load() {
         CoroutineScope(Dispatchers.Main).launch {
             withContext(Dispatchers.Default) {
+                //loadすることでデータベースのprojectを全てリストに追加しているはず
                 dao.getAll().forEach {item_ ->
                     drawerItemList.add(item_)
                 }
@@ -122,22 +126,23 @@ class MainActivity : ComponentActivity() {
             //本当ならここでtext.valueの値がデータベースに保存されるはず
             //postでデータベースに追加されるはずなのにされないのは多分databaseの値はStateじゃないから
             drawerContent = {
-                DrawerContent(text,
+                DrawerContent(drawerItemList ,text,
                     onClickButton = {
-                        //機能していない
+                        //機能していない➡やっぱり配列に対して処理を行っているから、データクラスのインスタンスそれぞれに行えばok?
                         post(text.value)
+//                        update(drawerItemList)
                                     },
                     itemClick = {itemLabel ->
                     Toast
                         .makeText(contextForToast, itemLabel, Toast.LENGTH_SHORT)
                         .show()
-//                    project = itemLabel
                     coroutineScope.launch {
                         delay(timeMillis = 250)
                         scaffoldState.drawerState.close()
                     }
 
                 },
+
 
                     )
             },
@@ -218,6 +223,32 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+
+    @Composable
+    fun TodoItem(project: NavigationDrawerItem) {
+        val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .clickable(onClick = { delete(project) })
+        ) {
+            Text(
+                text = project.projectName,
+                modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
+            )
+            Text(
+                text = "created at: ${sdf.format(project.created_at)}",
+                fontSize = 12.sp,
+                color = Color.LightGray,
+                textAlign = TextAlign.Right,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+
+
 }
 
 
@@ -228,7 +259,6 @@ fun GaugeProgress(boolean:MutableState<Boolean>) {
     //log確認用→最終的には消しておいて
     println("値は${boolean.value}になっている")
 }
-
 
 //timer関数による別スレッドは一つしか建てられないみたい？\
 fun Counter(boolean:MutableState<Boolean>, count:MutableState<Float>, hand:Handler){
