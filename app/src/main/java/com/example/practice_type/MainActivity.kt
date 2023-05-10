@@ -1,17 +1,16 @@
 package com.example.practice_type
 
 import android.icu.text.SimpleDateFormat
-import android.media.MediaParser.TrackData
+import android.media.Image
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,10 +20,10 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.futured.donut.compose.DonutProgress
@@ -39,6 +38,7 @@ import kotlin.concurrent.timer
 class MainActivity : ComponentActivity() {
 
     private val dao = RoomApplication.database.drawerItemDao()
+    //ただの表示用、最初は中に何も入っていない
     private val drawerItemList = mutableStateListOf<NavigationDrawerItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,8 +60,8 @@ class MainActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.Main).launch {
             withContext(Dispatchers.Default) {
                 //loadすることでデータベースのprojectを全てリストに追加しているはず
-                dao.getAll().forEach {item_ ->
-                    drawerItemList.add(item_)
+                dao.getAll().forEach {item ->
+                    drawerItemList.add(item)
                 }
             }
         }
@@ -72,9 +72,12 @@ class MainActivity : ComponentActivity() {
                 dao.post(NavigationDrawerItem(projectName = projectName, id = 0))
 
                 drawerItemList.clear()
+                load()
             }
         }
     }
+
+    //NavigationDrawerItemは一つのものをさしていて、drawerItemListはリストだから型が違う
     private fun delete(navigationDrawerItem: NavigationDrawerItem) {
         CoroutineScope(Dispatchers.Main).launch {
             withContext(Dispatchers.Default){
@@ -86,23 +89,35 @@ class MainActivity : ComponentActivity() {
         }
     }
     private fun update(navigationDrawerItem: NavigationDrawerItem) {
+        CoroutineScope(Dispatchers.Main).launch{
+            dao.updateNote(navigationDrawerItem)
 
+            drawerItemList.clear()
+            load()
+        }
     }
+
+
     //ページ1
     @Composable
     fun TimeManage(drawerItemList: SnapshotStateList<NavigationDrawerItem>) {
         StatusBarColor()
+
         val timer = remember { mutableStateOf(0f) }
-        val bool = remember { mutableStateOf(false) }
-        val counter = remember {mutableStateOf<Unit?>(null)}
+        //UI表示用のホルダー
         var project by remember{ mutableStateOf("") }
 
-        //新規projectをデータベースに記録するための
+        val bool = remember { mutableStateOf(false) }
+        val counter = remember {mutableStateOf<Unit?>(null)}
+
+        //新規projectをデータベースに記録するためのテキストフィールド
         var text = remember { mutableStateOf("") }
 
         val scaffoldState = rememberScaffoldState()
         val coroutineScope = rememberCoroutineScope()
         val contextForToast = LocalContext.current.applicationContext
+
+
 
         if(bool.value) {
             LaunchedEffect(Unit) {
@@ -112,7 +127,6 @@ class MainActivity : ComponentActivity() {
         }else{
             LaunchedEffect(Unit){}
         }
-
         Scaffold(
             topBar = {
                 MyTopAppBar{
@@ -136,6 +150,10 @@ class MainActivity : ComponentActivity() {
                     Toast
                         .makeText(contextForToast, itemLabel, Toast.LENGTH_SHORT)
                         .show()
+                        project = itemLabel
+                        bool.value = false
+                        timer.value = 0f
+
                     coroutineScope.launch {
                         delay(timeMillis = 250)
                         scaffoldState.drawerState.close()
@@ -209,13 +227,14 @@ class MainActivity : ComponentActivity() {
                                 .size(200.dp, 50.dp)
                                 .background(color = SubColor, shape = RoundedCornerShape(5)),
                             onClick = {
-                                GaugeProgress(bool)
+                                if(project != "") GaugeProgress(bool)
                             },
                             colors = ButtonDefaults.buttonColors(SubSubColor),
                         ) {
                             Text(text = if(bool.value == false){"start"}else{"fight for 1h"}, style = MaterialTheme.typography.h2)
                         }
                         Spacer(modifier = Modifier.padding(20.dp))
+
                     }
 
                 }
@@ -224,27 +243,53 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    //itemsの処理をmainに任せる関数を作成
     @Composable
-    fun TodoItem(project: NavigationDrawerItem) {
+    fun DrawerContentTest(navigationDrawerItem: NavigationDrawerItem){
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+//                .clickable(onClick = { delete(navigationDrawerItem) })
+        ) {
+            Row(){
+                Text(
+                    text = navigationDrawerItem.projectName,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 4.dp)
+                )
+            }
+        }
+    }
+    @Composable
+    fun TodoItem(navigationDrawerItem: NavigationDrawerItem) {
         val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .clickable(onClick = { delete(project) })
+//                .clickable(onClick = { delete(navigationDrawerItem) })
         ) {
-            Text(
-                text = project.projectName,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
-            )
-            Text(
-                text = "created at: ${sdf.format(project.created_at)}",
-                fontSize = 12.sp,
-                color = Color.LightGray,
-                textAlign = TextAlign.Right,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(){
+                Text(
+                    text = navigationDrawerItem.projectName,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 4.dp)
+                )
+                Button(onClick = {delete(navigationDrawerItem)}) {
+                    Text(text = "-")
+                }
+            }
+//            Text(
+//                text = "created at: ${sdf.format(navigationDrawerItem.created_at)}",
+//                fontSize = 12.sp,
+//                color = Color.LightGray,
+//                textAlign = TextAlign.Right,
+//                modifier = Modifier.fillMaxWidth()
+//            )
         }
     }
 
@@ -270,6 +315,7 @@ fun Counter(boolean:MutableState<Boolean>, count:MutableState<Float>, hand:Handl
     if (boolean.value == false) {
         timer.cancel()
     }
+
 }
 
 
