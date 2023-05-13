@@ -1,5 +1,6 @@
 package com.example.practice_type
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -64,12 +65,14 @@ fun DrawerContent(
                         fontSize = 16.sp,
                         color = Color.Black
                     )
+                    Divider(color = PrimaryColor, thickness = 2.dp)
                 }
                 //itemを使用すればRowやColumnを使えるらしい
                 items(projectList) { item ->
                     NavigationListItem(item = item) {
                         itemClick(
-                            item.projectName+"  "+item.time+"hours"
+                            item.projectName+" " +
+                                    "\n "+item.time+"hours"
                         )
                     }
                 }

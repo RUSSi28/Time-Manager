@@ -19,9 +19,11 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -166,130 +168,113 @@ class MainActivity : ComponentActivity() {
             },
 
         ) {paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-                    .background(BackColor),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ){
-                item{
-                    Spacer(modifier = Modifier.padding(10.dp))
-                    Column(
-                        modifier = Modifier.background(
-                            color = SubColor,
-                            //背景の丸角をパーセンテージで指定できる↓
-                            shape = RoundedCornerShape(5)
-                        ),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+            BoxWithConstraints(
+                modifier = Modifier.background(color = BackColor)
+            ) {
 
-
-                        //ゲージの表示進行
-                        Box() {
-                            DonutProgress(
-                                model = DonutModel(
-                                    cap = 60f,
-                                    masterProgress = 1f,
-                                    gapWidthDegrees = 0f,
-                                    gapAngleDegrees = 270f,
-                                    strokeWidth = 80f,
-                                    backgroundLineColor = Color.LightGray,
-                                    sections = listOf(
-//                      //timer.valueの値に応じてゲージを進行させる
-                                        DonutSection(amount = timer.value, color = Color.Cyan)
-                                    )
-                                ),
-                                config = DonutConfig(
-                                    gapAngleAnimationSpec = spring(),
-                                    backgroundLineColorAnimationSpec = spring(),
-                                    capAnimationSpec = spring(),
-                                    gapWidthAnimationSpec = spring(),
-                                    masterProgressAnimationSpec = spring(),
-                                    sectionAmountAnimationSpec = spring(),
-                                    sectionColorAnimationSpec = spring(),
-                                    strokeWidthAnimationSpec = spring(),
-                                ),
-                                modifier = Modifier
-                                    .size(300.dp)
-                                    .padding(20.dp)
-                            )
-                            //選んだprojectの名前表示
-                            Text(text = "$project",
-                                style = MaterialTheme.typography.h2,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(0.dp,0.dp,0.dp,10.dp)
-                            )
-                        }
-                        Button(
-                            modifier = Modifier
-                                .size(200.dp, 50.dp)
-                                .background(color = SubColor, shape = RoundedCornerShape(5)),
-                            onClick = {
-                                if(project != "") GaugeProgress(bool)
-                            },
-                            colors = ButtonDefaults.buttonColors(SubSubColor),
+//                androidx.compose.foundation.Image(painter = painterResource(id = R.drawable.keq), contentDescription = "")
+                val screenWidth = with(LocalDensity.current) { constraints.maxWidth.toDp() }
+                val screenHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize()
+                        .background(Color.Transparent),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    item {
+                        Spacer(modifier = Modifier.padding(10.dp))
+                        androidx.compose.foundation.Image(painter = painterResource(
+                            id = R.drawable.rekeq_copy),
+                            contentDescription = "keqing painted by RUSSi",
+                            modifier = Modifier.clip(shape = RoundedCornerShape(3))
+                                .size(screenWidth - 150.dp, (screenWidth - 150.dp)*9/16)
+                        )
+                        Spacer(modifier = Modifier.padding(10.dp))
+                        Column(
+                            modifier = Modifier.background(
+                                color = Color(0xFFA1D6E2),
+                                //背景の丸角をパーセンテージで指定できる↓
+                                shape = RoundedCornerShape(3)
+                            ),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(text = if(bool.value == false){"start"}else{"fight for 1h"}, style = MaterialTheme.typography.h2)
+
+
+                            //ゲージの表示進行
+                            Box() {
+                                DonutProgress(
+                                    model = DonutModel(
+                                        cap = 60f,
+                                        masterProgress = 1f,
+                                        gapWidthDegrees = 0f,
+                                        gapAngleDegrees = 270f,
+                                        strokeWidth = 80f,
+                                        backgroundLineColor = Color.LightGray,
+                                        sections = listOf(
+//                      //timer.valueの値に応じてゲージを進行させる
+                                            DonutSection(amount = timer.value, color = Color.Cyan)
+                                        )
+                                    ),
+                                    config = DonutConfig(
+                                        gapAngleAnimationSpec = spring(),
+                                        backgroundLineColorAnimationSpec = spring(),
+                                        capAnimationSpec = spring(),
+                                        gapWidthAnimationSpec = spring(),
+                                        masterProgressAnimationSpec = spring(),
+                                        sectionAmountAnimationSpec = spring(),
+                                        sectionColorAnimationSpec = spring(),
+                                        strokeWidthAnimationSpec = spring(),
+                                    ),
+                                    modifier = Modifier
+                                        .size(screenWidth - 150.dp)
+                                        .padding(20.dp)
+                                )
+                                //選んだprojectの名前+時間の表示、最初は""
+                                Text(
+                                    text = "$project",
+                                    style = MaterialTheme.typography.h2,
+                                    fontSize = 40.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 30.dp)
+                                )
+                            }
+                            Button(
+                                modifier = Modifier
+                                    .size(200.dp, 50.dp)
+                                    .background(color = SubColor, shape = RoundedCornerShape(5)),
+                                onClick = {
+                                    if (project != "") GaugeProgress(bool)
+                                },
+                                colors = ButtonDefaults.buttonColors(SubSubColor),
+                            ) {
+                                Text(
+                                    text = if (bool.value == false) {
+                                        "start"
+                                    } else {
+                                        "fight for 1h"
+                                    }, style = MaterialTheme.typography.h2
+                                )
+                            }
+                            Spacer(modifier = Modifier.padding(10.dp))
+
                         }
-                        Spacer(modifier = Modifier.padding(20.dp))
+                        
+                        Row(
+                            modifier = Modifier.padding(0.dp, 50.dp, 0.dp, 0.dp)
+                                .size(screenWidth - 150.dp, (screenWidth - 150.dp)/3)
+                        ) {
+                            Text(text = "total",
+                                modifier = Modifier.background(PrimaryColor)
+                                    .padding(),
+                                style = MaterialTheme.typography.h1
+                            )
+
+                        }
 
                     }
-
                 }
             }
-        }
-    }
-
-
-    //itemsの処理をmainに任せる関数を作成
-    @Composable
-    fun DrawerContentTest(navigationDrawerItem: NavigationDrawerItem){
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-//                .clickable(onClick = { delete(navigationDrawerItem) })
-        ) {
-            Row(){
-                Text(
-                    text = navigationDrawerItem.projectName,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 4.dp)
-                )
-            }
-        }
-    }
-    @Composable
-    fun TodoItem(navigationDrawerItem: NavigationDrawerItem) {
-        val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-//                .clickable(onClick = { delete(navigationDrawerItem) })
-        ) {
-            Row(){
-                Text(
-                    text = navigationDrawerItem.projectName,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 4.dp)
-                )
-                Button(onClick = {delete(navigationDrawerItem)}) {
-                    Text(text = "-")
-                }
-            }
-//            Text(
-//                text = "created at: ${sdf.format(navigationDrawerItem.created_at)}",
-//                fontSize = 12.sp,
-//                color = Color.LightGray,
-//                textAlign = TextAlign.Right,
-//                modifier = Modifier.fillMaxWidth()
-//            )
         }
     }
 
@@ -327,11 +312,3 @@ fun StatusBarColor(){
         systemUiController.setStatusBarColor(PrimaryColor)
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun DefaultPreview() {
-//    Practice_typeTheme {
-//        TimeManage()
-//    }
-//}
