@@ -20,6 +20,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -50,7 +51,7 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    color = MaterialTheme.colors.background,
                 ) {
                     TimeManage(drawerItemList)
                 }
@@ -105,19 +106,19 @@ class MainActivity : ComponentActivity() {
     fun TimeManage(drawerItemList: SnapshotStateList<NavigationDrawerItem>) {
         StatusBarColor()
 
-        val timer = remember { mutableStateOf(0f) }
         //UI表示用のホルダー
-        var project by remember{ mutableStateOf("") }
-
+        var project by remember{ mutableStateOf("choose \n a project") }
+        val timer = remember { mutableStateOf(0f) }
         val bool = remember { mutableStateOf(false) }
         val counter = remember {mutableStateOf<Unit?>(null)}
 
         //新規projectをデータベースに記録するためのテキストフィールド
         var text = remember { mutableStateOf("") }
-
         val scaffoldState = rememberScaffoldState()
         val coroutineScope = rememberCoroutineScope()
         val contextForToast = LocalContext.current.applicationContext
+
+
 
 
 
@@ -129,6 +130,11 @@ class MainActivity : ComponentActivity() {
         }else{
             LaunchedEffect(Unit){}
         }
+
+
+
+
+
         Scaffold(
             topBar = {
                 MyTopAppBar{
@@ -144,9 +150,7 @@ class MainActivity : ComponentActivity() {
             drawerContent = {
                 DrawerContent(drawerItemList ,text,
                     onClickButton = {
-                        //機能していない➡やっぱり配列に対して処理を行っているから、データクラスのインスタンスそれぞれに行えばok?
                         post(text.value)
-//                        update(drawerItemList)
                                     },
                     itemClick = {itemLabel ->
                     Toast
@@ -163,18 +167,19 @@ class MainActivity : ComponentActivity() {
 
                 },
 
-
                     )
             },
 
         ) {paddingValues ->
-            BoxWithConstraints(
-                modifier = Modifier.background(color = BackColor)
-            ) {
-
-//                androidx.compose.foundation.Image(painter = painterResource(id = R.drawable.keq), contentDescription = "")
+            BoxWithConstraints {
                 val screenWidth = with(LocalDensity.current) { constraints.maxWidth.toDp() }
                 val screenHeight = with(LocalDensity.current) { constraints.maxHeight.toDp() }
+
+                androidx.compose.foundation.Image(
+                    painter = painterResource(id = R.drawable.sky_),
+                    contentDescription = "",
+                    modifier = Modifier.size(screenWidth, screenHeight)
+                )
                 LazyColumn(
                     modifier = Modifier
                         .padding(paddingValues)
@@ -184,91 +189,115 @@ class MainActivity : ComponentActivity() {
                 ) {
                     item {
                         Spacer(modifier = Modifier.padding(10.dp))
-                        androidx.compose.foundation.Image(painter = painterResource(
-                            id = R.drawable.rekeq_copy),
-                            contentDescription = "keqing painted by RUSSi",
-                            modifier = Modifier.clip(shape = RoundedCornerShape(3))
-                                .size(screenWidth - 150.dp, (screenWidth - 150.dp)*9/16)
-                        )
                         Spacer(modifier = Modifier.padding(10.dp))
-                        Column(
-                            modifier = Modifier.background(
-                                color = Color(0xFFA1D6E2),
-                                //背景の丸角をパーセンテージで指定できる↓
-                                shape = RoundedCornerShape(3)
-                            ),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+                        Surface(elevation = 10.dp, shape = RoundedCornerShape(3)) {
+                            Column(
+                                modifier = Modifier.background(
+                                    color = Color(0xFFA1D6E2),
+                                    shape = RoundedCornerShape(3)
+                                ),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
 
 
-                            //ゲージの表示進行
-                            Box() {
-                                DonutProgress(
-                                    model = DonutModel(
-                                        cap = 60f,
-                                        masterProgress = 1f,
-                                        gapWidthDegrees = 0f,
-                                        gapAngleDegrees = 270f,
-                                        strokeWidth = 80f,
-                                        backgroundLineColor = Color.LightGray,
-                                        sections = listOf(
-//                      //timer.valueの値に応じてゲージを進行させる
-                                            DonutSection(amount = timer.value, color = Color.Cyan)
-                                        )
-                                    ),
-                                    config = DonutConfig(
-                                        gapAngleAnimationSpec = spring(),
-                                        backgroundLineColorAnimationSpec = spring(),
-                                        capAnimationSpec = spring(),
-                                        gapWidthAnimationSpec = spring(),
-                                        masterProgressAnimationSpec = spring(),
-                                        sectionAmountAnimationSpec = spring(),
-                                        sectionColorAnimationSpec = spring(),
-                                        strokeWidthAnimationSpec = spring(),
-                                    ),
+                                //ゲージの表示進行
+                                Box() {
+                                    DonutProgress(
+                                        model = DonutModel(
+                                            cap = 60f,
+                                            masterProgress = 1f,
+                                            gapWidthDegrees = 0f,
+                                            gapAngleDegrees = 270f,
+                                            strokeWidth = 80f,
+                                            backgroundLineColor = Color.LightGray,
+                                            sections = listOf(
+                                                DonutSection(
+                                                    amount = timer.value,
+                                                    color = Color.Cyan
+                                                )
+                                            )
+                                        ),
+                                        config = DonutConfig(
+                                            gapAngleAnimationSpec = spring(),
+                                            backgroundLineColorAnimationSpec = spring(),
+                                            capAnimationSpec = spring(),
+                                            gapWidthAnimationSpec = spring(),
+                                            masterProgressAnimationSpec = spring(),
+                                            sectionAmountAnimationSpec = spring(),
+                                            sectionColorAnimationSpec = spring(),
+                                            strokeWidthAnimationSpec = spring(),
+                                        ),
+                                        modifier = Modifier
+                                            .size(screenWidth - 150.dp)
+                                            .padding(20.dp)
+                                    )
+                                    //選んだprojectの名前+時間の表示、最初は""
+
+                                }
+                                Button(
                                     modifier = Modifier
-                                        .size(screenWidth - 150.dp)
-                                        .padding(20.dp)
+                                        .size(200.dp, 50.dp)
+                                        .background(
+                                            color = SubColor,
+                                            shape = RoundedCornerShape(5)
+                                        ),
+                                    onClick = {
+                                        if (project != "choose \n a project") GaugeProgress(bool)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(SubSubColor),
+                                ) {
+                                    Text(
+                                        text = if (bool.value == false) {
+                                            "start"
+                                        } else {
+                                            "fight for 1h"
+                                        }, style = MaterialTheme.typography.h2
+                                    )
+                                }
+                                Spacer(modifier = Modifier.padding(10.dp))
+
+                            }
+                        }
+
+
+                        Row(
+                            modifier = Modifier
+                                .padding(0.dp, 50.dp, 0.dp, 0.dp)
+                                .size(screenWidth - 150.dp, (screenWidth-150.dp)/4)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .background(
+                                        color = PrimaryColor,
+                                        shape = RoundedCornerShape(3)
+                                    )
+                                    .padding(10.dp, 5.dp, 20.dp, 5.dp),
+                            ) {
+                                Text(
+                                    text = "total",
+                                    modifier = Modifier.padding(0.dp, 0.dp, 40.dp, 0.dp),
+                                    style = MaterialTheme.typography.h1
                                 )
-                                //選んだprojectの名前+時間の表示、最初は""
                                 Text(
                                     text = "$project",
                                     style = MaterialTheme.typography.h2,
-                                    fontSize = 40.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 30.dp)
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    modifier = Modifier.padding(20.dp, 0.dp, 0.dp, 30.dp)
                                 )
                             }
-                            Button(
-                                modifier = Modifier
-                                    .size(200.dp, 50.dp)
-                                    .background(color = SubColor, shape = RoundedCornerShape(5)),
-                                onClick = {
-                                    if (project != "") GaugeProgress(bool)
-                                },
-                                colors = ButtonDefaults.buttonColors(SubSubColor),
+                            LazyColumn(
+                                modifier = Modifier.padding(20.dp, 0.dp, 0.dp, 0.dp)
                             ) {
-                                Text(
-                                    text = if (bool.value == false) {
-                                        "start"
-                                    } else {
-                                        "fight for 1h"
-                                    }, style = MaterialTheme.typography.h2
-                                )
+                                item {
+                                    Text(
+                                        text = "",
+                                        style = MaterialTheme.typography.h2,
+                                        fontSize = 20.sp
+                                    )
+                                }
                             }
-                            Spacer(modifier = Modifier.padding(10.dp))
 
-                        }
-                        
-                        Row(
-                            modifier = Modifier.padding(0.dp, 50.dp, 0.dp, 0.dp)
-                                .size(screenWidth - 150.dp, (screenWidth - 150.dp)/3)
-                        ) {
-                            Text(text = "total",
-                                modifier = Modifier.background(PrimaryColor)
-                                    .padding(),
-                                style = MaterialTheme.typography.h1
-                            )
 
                         }
 

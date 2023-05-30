@@ -46,7 +46,7 @@ fun DrawerContent(
                     .background(color = SubColor),
 //            .background(brush = Brush.verticalGradient(colors = gradientColors)),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(vertical = 36.dp)
+                contentPadding = PaddingValues(vertical = 36.dp),
             ) {
 
                 item {
@@ -72,7 +72,7 @@ fun DrawerContent(
                     NavigationListItem(item = item) {
                         itemClick(
                             item.projectName+" " +
-                                    "\n "+item.time+"hours"
+                                    "\n "+item.time+" h"
                         )
                     }
                 }
