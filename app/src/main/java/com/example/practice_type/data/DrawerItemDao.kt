@@ -1,8 +1,9 @@
-package com.example.practice_type
+package com.example.practice_type.data
 
 import androidx.room.*
 import androidx.room.Dao
 import androidx.room.Query
+import com.example.practice_type.data.NavigationDrawerItem
 
 @Dao
 interface DrawerItemDao {

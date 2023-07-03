@@ -1,4 +1,4 @@
-package com.example.practice_type
+package com.example.practice_type.data
 
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.painter.Painter

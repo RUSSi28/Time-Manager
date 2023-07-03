@@ -1,4 +1,4 @@
-package com.example.practice_type
+package com.example.practice_type.data
 
 import android.app.Application
 import androidx.room.Room

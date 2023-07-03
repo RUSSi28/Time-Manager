@@ -1,4 +1,4 @@
-package com.example.practice_type
+package com.example.practice_type.data
 
 import androidx.room.TypeConverter
 import java.util.*
